@@ -1,0 +1,20 @@
+spring:
+  flyway:
+    enabled: false
+  jpa:
+    hibernate:
+      ddl-auto: update
+  datasource:
+    url: jdbc:postgresql://postgres:5432/payflow
+    password: payflow_dev_pass_123
+  data:
+    redis:
+      host: redis
+      password: redis_dev_pass_123
+app:
+  jwt:
+    secret: jwt_secret_key_payflow_dev_2024_min_length_32_chars
+  internal-auth:
+    secret: internal_auth_secret_payflow_dev_2024
+  cors:
+    allowed-origins: "*"

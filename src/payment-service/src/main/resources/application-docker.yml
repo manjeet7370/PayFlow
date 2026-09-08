@@ -1,0 +1,28 @@
+spring:
+  flyway:
+    enabled: false
+  jpa:
+    hibernate:
+      ddl-auto: update
+  datasource:
+    url: jdbc:postgresql://postgres:5432/payflow
+    password: payflow_dev_pass_123
+  data:
+    redis:
+      host: redis
+      password: redis_dev_pass_123
+  kafka:
+    bootstrap-servers: kafka:9092
+app:
+  auth-service:
+    url: http://auth-service:8082
+  simulator:
+    url: http://simulator-service:8086
+  notification:
+    url: http://notification-service:8085
+  webhook:
+    secret: payflow_webhook_secret_dev_2024
+  internal-auth:
+    secret: internal_auth_secret_payflow_dev_2024
+  merchant:
+    api-keys: sk_test_88573d07c94d45f58ead0e698918f420

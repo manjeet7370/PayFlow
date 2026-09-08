@@ -1,0 +1,151 @@
+x-app: &app
+  profiles: ["services", "default"]
+  networks: [payflow-network]
+  environment:
+    SPRING_PROFILES_ACTIVE: docker
+
+services:
+  # ── Infrastructure ────────────────────────────────────────
+  postgres:
+    profiles: ["infra", "services", "default"]
+    image: postgres:14-alpine
+    container_name: payflow-postgres
+    environment:
+      POSTGRES_DB: payflow
+      POSTGRES_USER: payflow
+      POSTGRES_PASSWORD: payflow_dev_pass_123
+    command: postgres -c max_connections=50 -c shared_buffers=64MB -c effective_cache_size=128MB
+    ports: ["5432:5432"]
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./config/init-schemas.sql:/docker-entrypoint-initdb.d/init-schemas.sql:z
+    networks: [payflow-network]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U payflow"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    profiles: ["infra", "services", "default"]
+    image: redis:7-alpine
+    container_name: payflow-redis
+    command: redis-server --requirepass redis_dev_pass_123
+    ports: ["6379:6379"]
+    volumes: [redis_data:/data]
+    networks: [payflow-network]
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "redis_dev_pass_123", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  kafka:
+    profiles: ["infra", "services", "default"]
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: payflow-kafka
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:29092
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      CLUSTER_ID: b9H8-t06Q4SvTyaHU8Nf9w
+    ports: ["9092:9092"]
+    volumes: [kafka_data:/var/lib/kafka/data]
+    networks: [payflow-network]
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Backend Services ──────────────────────────────────────
+  auth-service:
+    <<: *app
+    build: { context: ./src/auth-service, dockerfile: Dockerfile }
+    container_name: payflow-auth
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+    ports: ["8082:8082"]
+
+  api-gateway:
+    <<: *app
+    build: { context: ./src/api-gateway, dockerfile: Dockerfile }
+    container_name: payflow-gateway
+    depends_on:
+      auth-service: { condition: service_started }
+      redis: { condition: service_healthy }
+    ports: ["8080:8080"]
+
+  payment-service:
+    <<: *app
+    build: { context: ./src/payment-service, dockerfile: Dockerfile }
+    container_name: payflow-payment
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_healthy }
+      kafka: { condition: service_healthy }
+    ports: ["8083:8083"]
+
+  notification-service:
+    <<: *app
+    build: { context: ./src/notification-service, dockerfile: Dockerfile }
+    container_name: payflow-notification
+    depends_on:
+      kafka: { condition: service_healthy }
+    ports: ["8085:8085"]
+
+  simulator-service:
+    <<: *app
+    build: { context: ./src/simulator-service, dockerfile: Dockerfile }
+    container_name: payflow-simulator
+    depends_on:
+      kafka: { condition: service_healthy }
+    ports: ["8086:8086"]
+
+  analytics-service:
+    <<: *app
+    build: { context: ./src/analytics-service, dockerfile: Dockerfile }
+    container_name: payflow-analytics
+    depends_on:
+      postgres: { condition: service_healthy }
+      kafka: { condition: service_healthy }
+    ports: ["8087:8087"]
+
+  audit-service:
+    <<: *app
+    build: { context: ./src/audit-service, dockerfile: Dockerfile }
+    container_name: payflow-audit
+    depends_on:
+      postgres: { condition: service_healthy }
+      kafka: { condition: service_healthy }
+    ports: ["8088:8088"]
+
+  # ── Frontend ──────────────────────────────────────────────
+  frontend:
+    <<: *app
+    build: { context: ./frontend/payment-page, dockerfile: Dockerfile }
+    container_name: payflow-frontend
+    environment:
+      API_BASE_URL: ""
+    depends_on:
+      api-gateway: { condition: service_started }
+    ports: ["5173:80"]
+
+networks:
+  payflow-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:
+  kafka_data:

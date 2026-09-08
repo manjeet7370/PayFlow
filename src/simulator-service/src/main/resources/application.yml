@@ -1,0 +1,25 @@
+server:
+  port: ${APP_PORT:8086}
+
+spring:
+  application:
+    name: simulator-service
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: simulator-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+app:
+  payment-service:
+    url: ${PAYMENT_SERVICE_URL:http://localhost:8083}
+  webhook:
+    secret: ${PAYMENT_WEBHOOK_SECRET}
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html

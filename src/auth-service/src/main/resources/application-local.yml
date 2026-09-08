@@ -1,0 +1,33 @@
+spring:
+  flyway:
+    enabled: false
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: auth_schema
+  datasource:
+    url: jdbc:postgresql://localhost:5432/payflow
+    username: payflow
+    password: payflow_dev_pass_123
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: redis_dev_pass_123
+  kafka:
+    bootstrap-servers: localhost:9092
+
+app:
+  jwt:
+    secret: dGhpcyBpcyBhIGp3dCBzZWNyZXQga2V5IGZvciBwYXlmbG93IGRldiBlbnZpcm9ubWVudA==
+  internal-auth:
+    secret: internal_service_secret_for_payflow_dev_environment_123456789
+  cors:
+    allowed-origins: http://localhost:5173
+
+server:
+  port: 8082

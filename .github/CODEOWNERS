@@ -1,0 +1,24 @@
+# Overall
+* @Drive10
+
+# CI / Security
+/.github/ @Drive10
+SECURITY.md @Drive10
+
+# Backend services
+/src/api-gateway/ @Drive10
+/src/auth-service/ @Drive10
+/src/payment-service/ @Drive10
+/src/notification-service/ @Drive10
+/src/simulator-service/ @Drive10
+/src/analytics-service/ @Drive10
+/src/audit-service/ @Drive10
+
+# Frontend
+/frontend/payment-page/ @Drive10
+
+# Infrastructure & config
+docker-compose.yml @Drive10
+Makefile @Drive10
+pom.xml @Drive10
+Dockerfile @Drive10

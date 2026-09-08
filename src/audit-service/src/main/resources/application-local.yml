@@ -1,0 +1,16 @@
+spring:
+  flyway:
+    enabled: false
+  datasource:
+    url: jdbc:postgresql://localhost:5432/payflow
+    username: payflow
+    password: payflow_dev_pass_123
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+  kafka:
+    bootstrap-servers: localhost:9092
+
+server:
+  port: 8088

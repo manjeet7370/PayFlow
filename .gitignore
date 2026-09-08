@@ -1,0 +1,64 @@
+# Build outputs
+target/
+*.jar
+*.war
+*.ear
+
+# IDE
+.idea/
+.vscode/
+.continue/
+*.iml
+.factorypath
+.classpath
+.project
+.settings/
+
+# Build
+.mvn/wrapper/maven-wrapper.jar
+.m2repo/
+
+# Environment (NEVER COMMIT .env files with real secrets)
+.env
+.env.local
+.env.development
+.env.staging
+.env.production
+.env.*.local
+
+# Logs
+logs/
+out/
+*.log
+*.log.*
+
+# Frontend
+**/node_modules/
+**/dist/
+**/build/
+
+# Test output
+**/test-output/
+**/surefire-reports/
+**/dependency-check-reports/
+
+# Docker volumes
+mariadb_data/
+mongodb_data/
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+
+# Misc
+*.bak
+*.swp
+*~
+coverage/.env.dev
+*.tsbuildinfo
+
+# OS
+.DS_Store
+Thumbs.db
+__MACOSX/

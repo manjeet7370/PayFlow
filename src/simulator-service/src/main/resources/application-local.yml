@@ -1,0 +1,15 @@
+spring:
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+app:
+  payment-service:
+    url: http://localhost:8083
+  webhook:
+    secret: webhook_secret_dev_789
+
+server:
+  port: 8086
